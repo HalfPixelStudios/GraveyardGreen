@@ -14,46 +14,32 @@ public class Enemy : MonoBehaviour
     //this is set to true if the zombie needs to see to follow the player
     public bool needsSight;
     public float centerY;
-    
-    
+
     public GameObject player;
-    private Animator anim;
     // Start is called before the first frame update
-    void Start()
-    {
-        anim = GetComponent<Animator>();
-    }
+   
 
     // Update is called once per frame
     void Update()
     {
+        player= Container.self.player;
         
-        
-        float dist=Mathf.Sqrt(Mathf.Pow(transform.position.x-player.transform.position.x,2)+Mathf.Pow(transform.position.y-player.transform.position.y,2));
-        angleToPlayer = Mathf.Atan2(player.transform.position.y-transform.position.y, player.transform.position.x-transform.position.x);
+        float dist=Mathf.Sqrt(Mathf.Pow(transform.position.x-player.transform.position.x,2)+Mathf.Pow(transform.position.z-player.transform.position.z,2));
+        angleToPlayer = Vector2.Angle(new Vector2(transform.forward.x, transform.forward.z),
+            new Vector2(player.transform.position.x - transform.position.x,
+                player.transform.position.z - transform.position.z));
         if (checkVisible(dist))
         {
             detected = true;
         }
         else
         {
-            if (detected)
-            {
-                gameObject.GetComponent<Rigidbody>().velocity=Vector2.zero;
-            }
             detected = false;
-            //just in case sight is greater than attack for some stupid reason
-            anim.SetBool("isAttacking", false);
         }
-
-        if (dist < attack_range)
+        if(dist<attack_range&&detected)
         {
+            attack = true;
             
-            anim.SetBool("isAttacking", true);
-
-
-
-
         }
         else
         {
@@ -64,25 +50,20 @@ public class Enemy : MonoBehaviour
 
     public bool checkVisible(float dist)
     {
-        RaycastHit hit;
-        Vector3 center=new Vector3(transform.position.x,transform.position.y+centerY,transform.position.z);
-        if (needsSight)
+        
+        if (needsSight&&!detected)
         {
-            Debug.DrawRay(center,transform.forward*sight , Color.green);
-            if(Physics.CapsuleCast(center,center,2,transform.forward*sight,out hit))
-            {
-                print("Hit");
-            
-                return hit.collider.gameObject == player;
-            }
-            else
-            {
-                return dist<sight&&detected;
-            }
+            return dist < sight && angleToPlayer < 30;
             
         }
+        return dist < sight;
 
-        return dist<sight;
+
+
+
+
+
+
 
     }
 }

@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody),typeof(Animator),typeof(Equip))]
 public class PlayerController : MonoBehaviour {
 
     private Rigidbody rb;
@@ -10,12 +12,15 @@ public class PlayerController : MonoBehaviour {
 
     Vector3 prev_pos;
 
+    private bool isHolding = false;
+
     //private float prev_angle;
     void Start() {
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
         equip = GetComponent<Equip>();
         anim.SetBool("isHolding", false);
+        anim.SetBool("isAttacking", false);
         prev_pos = transform.position;
     }
 
@@ -30,11 +35,16 @@ public class PlayerController : MonoBehaviour {
         Vector3 target_velocity = new Vector3(speed * dir_x, 0, speed * dir_z);
         rb.velocity = target_velocity;
         
-        if (Input.GetKeyDown(KeyCode.E)) {
-            equip.equipping = true;
-            anim.SetBool("isHolding",true);
+        //action button
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            if (equip.equipped.name.Equals("shovel"))
+            {
+                
+            }
+            
         }
-
+        //Debug.Log(equip.equipping);
 
 
         
@@ -69,5 +79,25 @@ public class PlayerController : MonoBehaviour {
         */
         anim.SetBool("isMoving",isMoving);
     }
-    
+
+    private void OnCollisionStay(Collision other)
+    {
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            GetComponent<HealthComponent>().modHp(-10);
+            
+            
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            GetComponent<HealthComponent>().modHp(-4);
+            
+            
+        }
+        
+    }
 }
